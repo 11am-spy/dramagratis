@@ -1,8 +1,0 @@
-{
-  "routes": [
-    {
-      "src": "/api/dramas",
-      "dest": "/api/dramas.js"
-    }
-  ]
-}
