@@ -294,11 +294,11 @@ function resetPlayerInterface() {
 }
 
 function startPlay() {
-  showToast(`Memutar Trailer: ${currentDrama.title}`);
+  showToast(`Memutar: ${currentDrama.title}`);
   const playerWrapper = document.getElementById('playerWrapper');
   
   if (currentDrama.youtubeId) {
-    // 1. Jika ada ID dari Jikan, putar trailer resmi bawaan
+    // 1. JALAN UTAMA: Jika ID ada, putar langsung di dalam iframe (Aman & Legal)
     playerWrapper.innerHTML = `
       <iframe 
         src="https://www.youtube.com/embed/${currentDrama.youtubeId}?autoplay=1" 
@@ -309,17 +309,22 @@ function startPlay() {
         style="width:100%; height:100%; background:#000; border:none;">
       </iframe>`;
   } else {
-    // 2. CADANGAN: Jika Jikan kosong, gunakan YouTube Search Embed berdasarkan judul anime + kata kunci "trailer"
-    const searchQuery = encodeURIComponent(`${currentDrama.title} official trailer`);
+    // 2. JALAN CADANGAN: Jika ID kosong/terblokir, tampilkan poster + tombol eksternal YouTube yang aman
+    const searchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(currentDrama.title + ' official trailer')}`;
+    
     playerWrapper.innerHTML = `
-      <iframe 
-        src="https://www.youtube.com/embed?listType=search&list=${searchQuery}&autoplay=1" 
-        title="YouTube video player" 
-        frameborder="0" 
-        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
-        allowfullscreen
-        style="width:100%; height:100%; background:#000; border:none;">
-      </iframe>`;
+      <div class="player-placeholder" style="background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('${currentDrama.hero}'); background-size: cover; background-position: center; display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100%; width: 100%; padding: 20px; text-align: center;">
+        <div style="background: rgba(229, 9, 20, 0.2); border: 1px solid var(--primary); border-radius: 8px; padding: 24px; max-width: 400px; backdrop-filter: blur(4px);">
+          <p style="font-size:16px; font-weight:700; color:#fff; margin-bottom:8px;">Trailer Tidak Dapat Diputar di Sini</p>
+          <p style="font-size:13px; color:#ccc; margin-bottom:20px; line-height:1.5;">
+            Pembatasan hak siar YouTube melarang pemutaran video "${currentDrama.title}" langsung di dalam aplikasi pihak ketiga.
+          </p>
+          <a href="${searchUrl}" target="_blank" class="btn-primary" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 10px 20px; background: #e50914; color: #fff; border-radius: 4px; font-weight: bold; font-size: 14px; transition: 0.2s;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="white" style="margin-top:1px;"><polygon points="5,3 19,12 5,21"/></svg>
+            Tonton di Aplikasi YouTube
+          </a>
+        </div>
+      </div>`;
   }
 }
 
