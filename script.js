@@ -1,11 +1,11 @@
 // ══════════════════════════════════════════════
-//  CONFIG SETTING BACK-END (VERCEL SERVERLESS)
+//   CONFIG SETTING BACK-END (VERCEL SERVERLESS)
 // ══════════════════════════════════════════════
 // Menggunakan origin Vercel karena Front-End dan Back-End (api/dramas.js) sudah menyatu
 const BACKEND_URL = window.location.origin; 
 
 // ══════════════════════════════════════════════
-//  GLOBAL APPLICATION STATE
+//   GLOBAL APPLICATION STATE
 // ══════════════════════════════════════════════
 let allDramas    = [];
 let browseDramas = [];
@@ -20,7 +20,7 @@ let currentEp    = 1;
 const GENRES = ['All', 'Romance', 'Action', 'Thriller', 'Drama', 'Family'];
 
 // ══════════════════════════════════════════════
-//  APP INITIALIZATION (LOAD HOME)
+//   APP INITIALIZATION (LOAD HOME)
 // ══════════════════════════════════════════════
 async function loadHome() {
   showSkeleton('trendingRow');
@@ -51,7 +51,6 @@ async function loadHome() {
     }
   } catch (error) {
     console.error("Gagal terhubung ke Vercel Serverless Back-End:", error);
-    // Teks di bawah ini sudah diperbaiki agar tidak membawa-bawa nama Railway lagi
     showErrorPlaceholder('Gagal memuat data dari fungsi serverless Vercel.');
   }
 }
@@ -65,7 +64,7 @@ function showErrorPlaceholder(msg) {
 }
 
 // ══════════════════════════════════════════════
-//  DATA STRUCTURE NORMALIZATION (JIKAN ANIME VERSION)
+//   DATA STRUCTURE NORMALIZATION (JIKAN ANIME VERSION)
 // ══════════════════════════════════════════════
 function normalizeDrama(raw) {
   if (!raw) return null;
@@ -74,7 +73,7 @@ function normalizeDrama(raw) {
   const primaryGenre = raw.genres && raw.genres.length > 0 ? raw.genres[0].name : 'Anime';
   
   return {
-    id:       raw.mal_id || Math.random().toString(),
+    id:       raw.mal_id ? raw.mal_id.toString() : Math.random().toString(),
     title:    raw.title_english || raw.title || 'Anime Title',
     year:     raw.year || 2026,
     genre:    primaryGenre,
@@ -82,12 +81,14 @@ function normalizeDrama(raw) {
     rating:   parseFloat(raw.score || 8.5).toFixed(1),
     cover:    raw.images?.jpg?.large_image_url || raw.images?.jpg?.image_url || 'https://picsum.photos/320/440',
     hero:     raw.images?.jpg?.large_image_url || 'https://picsum.photos/1920/1080',
-    desc:     raw.synopsis || 'Tidak ada sinopsis resmi untuk anime ini.'
+    desc:     raw.synopsis || 'Tidak ada sinopsis resmi untuk anime ini.',
+    // Menangkap ID Video YouTube bawaan dari Jikan API
+    youtubeId: raw.trailer?.youtube_id || null
   };
 }
 
 // ══════════════════════════════════════════════
-//  UI RENDER CARDS & SKELETON
+//   UI RENDER CARDS & SKELETON
 // ══════════════════════════════════════════════
 function makeCard(d) {
   return `
@@ -124,7 +125,7 @@ function showSkeleton(containerId) {
 }
 
 // ══════════════════════════════════════════════
-//  HERO SLIDER ENGINE
+//   HERO SLIDER ENGINE
 // ══════════════════════════════════════════════
 function buildHero(dramas) {
   heroSlides = dramas;
@@ -151,7 +152,7 @@ function buildHero(dramas) {
         </div>
         <p class="hero-desc">${d.desc}</p>
         <div class="hero-actions">
-          <button class="btn-primary" onclick="openModal('${d.id}')">Tonton Sekarang</button>
+          <button class="btn-primary" onclick="openModalAndPlay('${d.id}')">Tonton Sekarang</button>
         </div>
       </div>`;
     hero.insertBefore(slide, dots);
@@ -183,7 +184,7 @@ function startHeroTimer() {
 }
 
 // ══════════════════════════════════════════════
-//  PAGE CONTROLLER (BERANDA vs ALL DRAMA)
+//   PAGE CONTROLLER (BERANDA vs ALL DRAMA)
 // ══════════════════════════════════════════════
 function showPage(page) {
   document.getElementById('hero').style.display        = page === 'home' ? 'block' : 'none';
@@ -229,13 +230,8 @@ function renderBrowseGrid() {
   document.getElementById('loadMoreBtn').style.display = (browseOffset + 24 >= filtered.length) ? 'none' : 'inline-block';
 }
 
-function loadMore() {
-  browseOffset += 24;
-  renderBrowseGrid();
-}
-
 // ══════════════════════════════════════════════
-//  LIVE SEARCH SYSTEM
+//   LIVE SEARCH SYSTEM
 // ══════════════════════════════════════════════
 function handleSearch(query) {
   if (!query.trim()) { showPage('home'); return; }
@@ -256,7 +252,7 @@ function handleSearch(query) {
 }
 
 // ══════════════════════════════════════════════
-//  DYNAMIC MODAL & STREAMS PLAYER
+//   DYNAMIC MODAL & STREAMS PLAYER
 // ══════════════════════════════════════════════
 async function openModal(id) {
   currentDrama = allDramas.find(d => d.id === id);
@@ -293,18 +289,35 @@ function resetPlayerInterface() {
         <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg>
       </div>
       <p style="font-size:16px; font-weight:600; margin-bottom:4px;">${currentDrama.title}</p>
-      <p style="font-size:12px; color:var(--muted);">Episode ${currentEp} · Klik tombol play untuk mulai memutar</p>
+      <p style="font-size:12px; color:var(--muted);">Episode ${currentEp} · Klik tombol play untuk mulai memutar trailer</p>
     </div>`;
 }
 
 function startPlay() {
-  showToast(`Memutar Episode ${currentEp}`);
-  document.getElementById('playerWrapper').innerHTML = `
-    <video controls autoplay style="width:100%; height:100%; object-fit:contain; background:#000;">
-      <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
-      Browser kamu tidak mendukung pemutaran video html5.
-    </video>
-  `;
+  showToast(`Memutar Trailer: ${currentDrama.title}`);
+  const playerWrapper = document.getElementById('playerWrapper');
+  
+  if (currentDrama.youtubeId) {
+    // Memutar video trailer resmi menggunakan YouTube embed iframe
+    playerWrapper.innerHTML = `
+      <iframe 
+        src="https://www.youtube.com/embed/${currentDrama.youtubeId}?autoplay=1" 
+        title="YouTube video player" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        allowfullscreen
+        style="width:100%; height:100%; background:#000; border:none;">
+      </iframe>`;
+  } else {
+    // Tampilan jika anime tidak memiliki data trailer di Jikan API
+    playerWrapper.innerHTML = `
+      <div class="player-placeholder">
+        <p style="font-size:16px; font-weight:600; color:var(--primary); margin-bottom:4px;">Video Tidak Tersedia</p>
+        <p style="font-size:12px; color:var(--muted); padding: 0 16px; text-align:center;">
+          Mohon maaf, Jikan API tidak menyediakan data trailer resmi untuk anime "${currentDrama.title}".
+        </p>
+      </div>`;
+  }
 }
 
 function changeEpisode(epNum, btn) {
@@ -312,7 +325,7 @@ function changeEpisode(epNum, btn) {
   document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('current'));
   btn.classList.add('current');
 
-  if (document.getElementById('playerWrapper').querySelector('video')) {
+  if (document.getElementById('playerWrapper').querySelector('iframe')) {
     startPlay();
   } else {
     resetPlayerInterface();
@@ -329,8 +342,16 @@ function closeModal(e) {
   if (e.target.id === 'modal-overlay') closeModalDirect();
 }
 
+// Fungsi pembantu shortcut untuk tombol Banner Hero Atas
+function openModalAndPlay(id) {
+  openModal(id);
+  setTimeout(() => {
+    startPlay();
+  }, 300);
+}
+
 // ══════════════════════════════════════════════
-//  TOAST SYSTEM SYSTEM
+//   TOAST SYSTEM SYSTEM
 // ══════════════════════════════════════════════
 function showToast(msg) {
   const t = document.getElementById('toast');
