@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DramaStream — Nonton Drama Gratis</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <nav>
+    <div class="logo" onclick="showPage('home')">DRAMA<span>STREAM</span></div>
+    <ul class="nav-links">
+      <li><a class="nav-link active" onclick="showPage('home')">Beranda</a></li>
+      <li><a class="nav-link" onclick="showPage('browse')">Semua Drama</a></li>
+      <li><a class="nav-link" onclick="filterByGenre('Romance')">Romance</a></li>
+      <li><a class="nav-link" onclick="filterByGenre('Action')">Action</a></li>
+      <li><a class="nav-link" onclick="filterByGenre('Thriller')">Thriller</a></li>
+    </ul>
+    <div class="search-bar">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+      </svg>
+      <input type="text" placeholder="Cari drama..." id="searchInput" oninput="handleSearch(this.value)">
+    </div>
+  </nav>
+
+  <div id="hero">
+    <div class="hero-dots" id="heroDots"></div>
+  </div>
+
+  <main id="mainContent">
+    <section id="trendingSection">
+      <div class="section-header">
+        <h2 class="section-title">🔥 Trending Sekarang</h2>
+        <a class="see-all" onclick="showPage('browse')">Lihat Semua →</a>
+      </div>
+      <div class="card-row" id="trendingRow">
+        </div>
+    </section>
+
+    <section id="newSection">
+      <div class="section-header">
+        <h2 class="section-title">✨ Terbaru</h2>
+        <a class="see-all" onclick="showPage('browse')">Lihat Semua →</a>
+      </div>
+      <div class="card-row" id="newRow"></div>
+    </section>
+
+    <section id="topSection">
+      <div class="section-header">
+        <h2 class="section-title">⭐ Top Rated</h2>
+        <a class="see-all" onclick="showPage('browse')">Lihat Semua →</a>
+      </div>
+      <div class="card-row" id="topRow"></div>
+    </section>
+  </main>
+
+  <div id="browsePage" style="display:none; padding: 0 32px;">
+    <div style="padding: 24px 0 12px;">
+      <h1 style="font-family:'Bebas Neue',sans-serif; font-size:32px; letter-spacing:1px; margin-bottom:16px;">
+        Semua Drama
+      </h1>
+      <div class="genre-pills" id="genrePills"></div>
+    </div>
+    <div class="card-grid" id="browseGrid"></div>
+    <div style="text-align:center; margin:32px 0;">
+      <button class="btn-secondary" id="loadMoreBtn" onclick="loadMore()">
+        Muat Lebih Banyak
+      </button>
+    </div>
+  </div>
+
+  <div id="modal-overlay" onclick="closeModal(event)">
+    <div class="modal" id="modal">
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+      <div class="player-wrapper" id="playerWrapper">
+        </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <footer>
+    <div class="logo">DRAMA<span>STREAM</span></div>
+    <p>© 2026 DramaStream · Custom API Template</p>
+    <p style="font-size:11px;">Untuk hiburan semata</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
