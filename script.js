@@ -2,7 +2,7 @@
 //  CONFIG SETTING BACK-END (RAILWAY)
 // ══════════════════════════════════════════════
 // ⚠️ GANTI URL di bawah ini dengan domain yang kamu dapat dari Railway setelah deploy!
-const BACKEND_URL = 'https://nama-project-kamu.up.railway.app'; 
+const BACKEND_URL = window.location.origin;
 
 // ══════════════════════════════════════════════
 //  GLOBAL APPLICATION STATE
