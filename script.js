@@ -298,7 +298,7 @@ function startPlay() {
   const playerWrapper = document.getElementById('playerWrapper');
   
   if (currentDrama.youtubeId) {
-    // Memutar video trailer resmi menggunakan YouTube embed iframe
+    // 1. Jika ada ID dari Jikan, putar trailer resmi bawaan
     playerWrapper.innerHTML = `
       <iframe 
         src="https://www.youtube.com/embed/${currentDrama.youtubeId}?autoplay=1" 
@@ -309,14 +309,17 @@ function startPlay() {
         style="width:100%; height:100%; background:#000; border:none;">
       </iframe>`;
   } else {
-    // Tampilan jika anime tidak memiliki data trailer di Jikan API
+    // 2. CADANGAN: Jika Jikan kosong, gunakan YouTube Search Embed berdasarkan judul anime + kata kunci "trailer"
+    const searchQuery = encodeURIComponent(`${currentDrama.title} official trailer`);
     playerWrapper.innerHTML = `
-      <div class="player-placeholder">
-        <p style="font-size:16px; font-weight:600; color:var(--primary); margin-bottom:4px;">Video Tidak Tersedia</p>
-        <p style="font-size:12px; color:var(--muted); padding: 0 16px; text-align:center;">
-          Mohon maaf, Jikan API tidak menyediakan data trailer resmi untuk anime "${currentDrama.title}".
-        </p>
-      </div>`;
+      <iframe 
+        src="https://www.youtube.com/embed?listType=search&list=${searchQuery}&autoplay=1" 
+        title="YouTube video player" 
+        frameborder="0" 
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+        allowfullscreen
+        style="width:100%; height:100%; background:#000; border:none;">
+      </iframe>`;
   }
 }
 
