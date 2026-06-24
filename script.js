@@ -1,8 +1,8 @@
 // ══════════════════════════════════════════════
-//  CONFIG SETTING BACK-END (RAILWAY)
+//  CONFIG SETTING BACK-END (VERCEL SERVERLESS)
 // ══════════════════════════════════════════════
-// ⚠️ GANTI URL di bawah ini dengan domain yang kamu dapat dari Railway setelah deploy!
-const BACKEND_URL = window.location.origin;
+// Menggunakan origin Vercel karena Front-End dan Back-End (api/dramas.js) sudah menyatu
+const BACKEND_URL = window.location.origin; 
 
 // ══════════════════════════════════════════════
 //  GLOBAL APPLICATION STATE
@@ -28,7 +28,7 @@ async function loadHome() {
   showSkeleton('topRow');
 
   try {
-    // Menembak data berkapasitas agak besar (misal 30 drama sekaligus) dari API via Back-End
+    // Menembak data dari API internal Vercel Serverless kita sendiri
     const response = await fetch(`${BACKEND_URL}/api/dramas?size=30`);
     const result = await response.json();
     
@@ -42,16 +42,17 @@ async function loadHome() {
       // 1. Ambil 5 data teratas buat dipasang di Banner Hero Atas
       buildHero(allDramas.slice(0, 5));
       
-      // 2. Bagi-bagi data secara acak/berurutan ke baris row masing-masing sebagai variasi
+      // 2. Bagi-bagi data secara berurutan ke baris row masing-masing sebagai variasi
       document.getElementById('trendingRow').innerHTML = allDramas.slice(0, 10).map(makeCard).join('');
       document.getElementById('newRow').innerHTML      = allDramas.slice(10, 20).map(d => makeCard({...d, isNew: true})).join('');
       document.getElementById('topRow').innerHTML      = allDramas.slice(20, 30).map(makeCard).join('');
     } else {
-      showErrorPlaceholder('Data drama kosong dari API.');
+      showErrorPlaceholder('Data drama kosong atau tidak ditemukan dari API.');
     }
   } catch (error) {
-    console.error("Gagal terhubung ke Back-End:", error);
-    showErrorPlaceholder('Gagal terhubung ke server Back-End Railway.');
+    console.error("Gagal terhubung ke Vercel Serverless Back-End:", error);
+    // Teks di bawah ini sudah diperbaiki agar tidak membawa-bawa nama Railway lagi
+    showErrorPlaceholder('Gagal memuat data dari fungsi serverless Vercel.');
   }
 }
 
@@ -127,7 +128,6 @@ function buildHero(dramas) {
   const dots = document.getElementById('heroDots');
   if(!hero || !dots) return;
 
-  // Bersihkan slider & dot bawaan html lama
   dots.innerHTML = '';
   document.querySelectorAll('.hero-slide').forEach(el => el.remove());
   
@@ -264,7 +264,6 @@ async function openModal(id) {
 
   resetPlayerInterface();
 
-  // Hitung jumlah list tombol episode
   let totalEp = parseInt(currentDrama.episodes) || 12;
 
   document.getElementById('modalBody').innerHTML = `
@@ -296,7 +295,6 @@ function resetPlayerInterface() {
 
 function startPlay() {
   showToast(`Memutar Episode ${currentEp}`);
-  // 💡 Nanti ganti link URL .mp4 di bawah ini kalau kamu sudah punya stream url asli dari API-mu
   document.getElementById('playerWrapper').innerHTML = `
     <video controls autoplay style="width:100%; height:100%; object-fit:contain; background:#000;">
       <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
@@ -310,7 +308,6 @@ function changeEpisode(epNum, btn) {
   document.querySelectorAll('.ep-btn').forEach(b => b.classList.remove('current'));
   btn.classList.add('current');
 
-  // Jika user ganti episode saat video sedang dimainkan, langsung auto-play video barunya
   if (document.getElementById('playerWrapper').querySelector('video')) {
     startPlay();
   } else {
