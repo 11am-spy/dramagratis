@@ -1,5 +1,5 @@
 export default async function handler(req, res) {
-  // Pengaturan keamanan (CORS Headers) agar Front-End Vercel bisa mengaksesnya
+  // Mengizinkan Front-End dari mana saja untuk mengakses API ini (CORS)
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS');
@@ -11,37 +11,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { keyword, page, size } = req.query;
-    
-    // Data API Key dari screenshot RapidAPI kamu kemarin
-    const RAPIDAPI_KEY = 'b8ad68c092mshdb00e516b8d148cp19c7cejsn7fe5c2a0bf25';
-    const RAPIDAPI_HOST = 'short-drama-pro.p.rapidapi.com';
-    const targetUrl = new URL('https://short-drama-pro.p.rapidapi.com/starshort/api/v1/dramas/search');
-    
-    // Oper parameter pencarian/pagination dari Front-End jika ada
-    if (keyword) targetUrl.searchParams.set('keyword', keyword);
-    if (page) targetUrl.searchParams.set('page', page);
-    targetUrl.searchParams.set('size', size || '30'); // Default ambil 30 data
+    // Menembak Jikan API untuk mengambil daftar anime top saat ini
+    const response = await fetch('https://api.jikan.moe/v4/top/anime?filter=bypopularity&limit=25');
+    const result = await response.json();
 
-    const response = await fetch(targetUrl, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-rapidapi-host': RAPIDAPI_HOST,
-        'x-rapidapi-key': RAPIDAPI_KEY
-      }
-    });
-
-    if (!response.ok) {
-      return res.status(response.status).json({ error: `RapidAPI error dengan status ${response.status}` });
-    }
-
-    const data = await response.json();
-    return res.status(200).json(data);
-    
+    // Kirim datanya ke Front-End websitemu
+    res.status(200).json(result.data || []);
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({ error: 'Internal Server Error pada serverless Vercel' });
+    console.error("Error Jikan API:", error);
+    res.status(500).json({ error: "Gagal mengambil data anime dari server publik." });
   }
 }
-
