@@ -65,20 +65,24 @@ function showErrorPlaceholder(msg) {
 }
 
 // ══════════════════════════════════════════════
-//  DATA STRUCTURE NORMALIZATION
+//  DATA STRUCTURE NORMALIZATION (JIKAN ANIME VERSION)
 // ══════════════════════════════════════════════
 function normalizeDrama(raw) {
   if (!raw) return null;
+  
+  // Mengambil genre pertama jika ada, kalau tidak ada default ke 'Anime'
+  const primaryGenre = raw.genres && raw.genres.length > 0 ? raw.genres[0].name : 'Anime';
+  
   return {
-    id:       raw.id || raw.dramaId || Math.random().toString(),
-    title:    raw.title || raw.name || raw.dramaName || 'Short Drama',
-    year:     raw.year || raw.releaseYear || 2026,
-    genre:    raw.genre || 'Drama',
-    episodes: raw.episodes || raw.totalEpisodes || raw.episodeCount || '?',
-    rating:   parseFloat(raw.rating || 8.5).toFixed(1),
-    cover:    raw.cover || raw.poster || raw.coverUrl || 'https://picsum.photos/320/440',
-    hero:     raw.banner || raw.coverWide || raw.backdropUrl || 'https://picsum.photos/1920/1080',
-    desc:     raw.description || raw.summary || raw.synopsis || 'Tidak ada sinopsis resmi untuk drama pendek ini.'
+    id:       raw.mal_id || Math.random().toString(),
+    title:    raw.title_english || raw.title || 'Anime Title',
+    year:     raw.year || 2026,
+    genre:    primaryGenre,
+    episodes: raw.episodes || '?',
+    rating:   parseFloat(raw.score || 8.5).toFixed(1),
+    cover:    raw.images?.jpg?.large_image_url || raw.images?.jpg?.image_url || 'https://picsum.photos/320/440',
+    hero:     raw.images?.jpg?.large_image_url || 'https://picsum.photos/1920/1080',
+    desc:     raw.synopsis || 'Tidak ada sinopsis resmi untuk anime ini.'
   };
 }
 
